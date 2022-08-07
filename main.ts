@@ -70,12 +70,16 @@ function messagesReducer(list: shapeObject[]) : shapeObject[] {
 
 function processMessagesHandler(list: shapeObject[]) {
   console.log("Shape files updated: " + JSON.stringify(list));
+  console.log(list.constructor.name);
   for (const so of list) {
+    //console.log("ShapeObject updated: " + JSON.stringify(so));
     processShapeObject(so);
   }
 }
 
 async function processShapeObject(sl: shapeObject) {
+  //console.log("Shape file updated: " + JSON.stringify(sl));
+  console.log(sl.constructor.name);
   var fl_s3 = await getShapeTypeListFromS3(sl);
   if (fl_s3 == null) {
     console.warn("File list is null, skipping redis update");
@@ -216,8 +220,8 @@ async function getShapeTypeListFromRedis(type: string): Promise<fileList | null>
 
 
 const run = async () => {
-  rec.connect();
-  rec.ping();
+  await rec.connect();
+  await rec.ping();
   sq.run<shapeObject>();
 }
 

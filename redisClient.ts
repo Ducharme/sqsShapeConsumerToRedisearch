@@ -3,7 +3,7 @@ const redis = require("redis");
 
 
 export class redisClient {
-    private readonly params = { host: process.env.REDIS_HOST };
+    private readonly params = { 'socket': { 'host': process.env.REDIS_HOST } };
     private readonly client = redis.createClient(this.params);
 
     constructor() {

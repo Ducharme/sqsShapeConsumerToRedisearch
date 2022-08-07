@@ -28,8 +28,9 @@ export class sqsClient {
       if (msg.Body === undefined)
         continue;
 
-      var item: T = this.messageHandler(msg);
-      fullList.push(item);
+      var items: T[] = this.messageHandler(msg);
+      for (const item of items)
+        fullList.push(item);
     }
 
     try {
