@@ -1,5 +1,5 @@
 import { Message } from "@aws-sdk/client-sqs";
-import { fileList, Shape, shapeObject, ShapeStatus } from "./shapeTypes";
+import { fileList, Shape, shapeObject, ShapeStatus, ShapeType } from "./shapeTypes";
 import { getFileDiffList } from "./shapeDiffFinder";
 import { s3client } from "./s3Client";
 import { redisClient } from "./redisClient";
@@ -72,13 +72,11 @@ function processMessagesHandler(list: shapeObject[]) {
   console.log("Shape files updated: " + JSON.stringify(list));
   console.log(list.constructor.name);
   for (const so of list) {
-    //console.log("ShapeObject updated: " + JSON.stringify(so));
     processShapeObject(so);
   }
 }
 
 async function processShapeObject(sl: shapeObject) {
-  //console.log("Shape file updated: " + JSON.stringify(sl));
   console.log(sl.constructor.name);
   var fl_s3 = await getShapeTypeListFromS3(sl);
   if (fl_s3 == null) {
@@ -150,7 +148,16 @@ async function processShapeObject(sl: shapeObject) {
   }
   
   var ret = await Promise.all(promises);
+  var publishPromises : Promise<any>[] = [];
   console.log(ret);
+
+  // TODO: Only publish for the specific types which have changed
+  publishPromises.push(rec.publishChange(ShapeType.Limit));
+  publishPromises.push(rec.publishChange(ShapeType.NoGo));
+  publishPromises.push(rec.publishChange(ShapeType.Parking));
+  publishPromises.push(rec.publishChange(ShapeType.NoParking));
+  var ret2 = await Promise.all(promises);
+  console.log(ret2);
 }
 
 async function getShapeTypeListFromS3(sl: shapeObject) : Promise<fileList | null> {

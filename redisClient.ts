@@ -1,10 +1,11 @@
-import { Shape, ShapeArray, ShapeStatus } from "./shapeTypes";
+import { Shape, ShapeArray, ShapeStatus, ShapeType } from "./shapeTypes";
 const redis = require("redis");
 
 
 export class redisClient {
     private readonly params = { 'socket': { 'host': process.env.REDIS_HOST } };
     private readonly client = redis.createClient(this.params);
+    private readonly shapeChangedChannel = "ShapeChanged";
 
     constructor() {
         this.client.on("connect", () => {
@@ -32,7 +33,7 @@ export class redisClient {
         await this.client.ping();
     }
 
-    public async getShapeType(type: string) : Promise<ShapeArray> {
+    public async getShapeType(type: ShapeType) : Promise<ShapeArray> {
         console.log(`Getting list of ${type} from redis.`);
         const indexName = 'shape-type-idx';
         const filter = `@type:(${type})`;
@@ -62,5 +63,11 @@ export class redisClient {
         var key = 'SHAPELOC:' + shapeId;
         return this.client.del(key)
             .catch((err: any) => console.log(`removeShape failed for ${key} -> ${err}`));
+    }
+
+    public async publishChange(type: ShapeType) : Promise<any> {
+        const channel = this.shapeChangedChannel;
+        return this.client.publish(channel, type.toString())
+            .catch((err: any) => console.log(`Publish to ${channel} failed for ${type} -> ${err}`));
     }
 }
