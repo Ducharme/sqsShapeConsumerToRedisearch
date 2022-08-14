@@ -84,7 +84,8 @@ async function processShapeObject(sl: shapeObject) {
     return;
   }
 
-  var fl_re = await getShapeTypeListFromRedis(fl_s3.shapeType);
+  const shapeType = fl_s3.shapeType as ShapeType;
+  var fl_re = await getShapeTypeListFromRedis(shapeType);
   if (fl_re == null) {
     console.warn("File list is null from redis, skipping update");
     return;
@@ -194,7 +195,7 @@ async function getShapeTypeListFromS3(sl: shapeObject) : Promise<fileList | null
   }
 }
 
-async function getShapeTypeListFromRedis(type: string): Promise<fileList | null> {
+async function getShapeTypeListFromRedis(type: ShapeType): Promise<fileList | null> {
   try {
     var sa = await rec.getShapeType(type);
 
