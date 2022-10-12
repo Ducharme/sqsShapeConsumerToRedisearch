@@ -18,10 +18,11 @@ export class s3client {
           njrs.on("end", () => resolve(Buffer.concat(chunks).toString("utf8")));
         } else if (rs !== undefined) {
           const chunks = [new Uint8Array()];
+          // NOTE: Bug when using specific type - code does not compile
+          // error TS2552: Cannot find name 'ReadableStreamDefaultReadResult'. Did you mean 'ReadableStreamDefaultReader'?
           var reader: ReadableStreamDefaultReader<Uint8Array> = rs.getReader();
           while (true) {
-            const promiseResult : Promise<ReadableStreamDefaultReadResult<any>> = reader.read();
-            const readResult : ReadableStreamDefaultReadResult<any> = await promiseResult;
+            const readResult : any = await reader.read();
             if (readResult.done) {
               break;
             }
