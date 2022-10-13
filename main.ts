@@ -14,6 +14,12 @@ function receivedMessageHandler(msg: Message) : shapeObject[] {
   var shapeObjects : shapeObject[] = []; // One list per ShapeType
 
   const body = JSON.parse(msg.Body!);
+  // {"Service":"Amazon S3","Event":"s3:TestEvent","Time":"2022-10-11T14:51:13.969Z",
+  // "Bucket":"lafleet-shape-repo-748293476463","RequestId":"P242ASWRKC0N7JVT",
+  // "HostId":"HmDfdTt8rd5V87LqZLY5gIafwA+BwitouYKzhuWi1BprUYliOJF80xkbRFMd3wfsAdvpsnNZLWw="}
+  if (body.Records == undefined || body.Event == "s3:TestEvent")
+    return shapeObjects;
+
   for (const rec of body.Records) {
     var s3Item = rec.s3;
     if (s3Item === undefined || s3Item == "") {
@@ -228,8 +234,8 @@ async function getShapeTypeListFromRedis(type: ShapeType): Promise<fileList | nu
 
 
 const run = async () => {
-  await rec.connect();
-  await rec.ping();
+  /*await rec.connect();
+  await rec.ping();*/
   sq.run<shapeObject>();
 }
 
