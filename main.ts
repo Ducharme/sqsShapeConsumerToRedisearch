@@ -234,8 +234,8 @@ async function getShapeTypeListFromRedis(type: ShapeType): Promise<fileList | nu
 
 
 const run = async () => {
-  /*await rec.connect();
-  await rec.ping();*/
+  await rec.connect();
+  await rec.ping();
   sq.run<shapeObject>();
 }
 
