@@ -6,6 +6,7 @@ export class redisClient {
     private readonly params = { 'socket': { 'host': process.env.REDIS_HOST } };
     private readonly client = redis.createClient(this.params);
     private readonly shapeChangedChannel = "ShapeChanged";
+    private alive = false;
 
     constructor() {
         this.client.on("connect", () => {
@@ -13,11 +14,14 @@ export class redisClient {
         });
         this.client.on("ready", () => {
             console.log('Redis client ready');
+            this.alive = true;
         });
         this.client.on("end", () => {
+            this.alive = false;
             console.log('Redis client disconnected');
         });
         this.client.on("reconnecting", () => {
+            this.alive = false;
             console.log('Redis client reconnecting');
         });
         this.client.on("error", function(error: any) {
@@ -33,6 +37,10 @@ export class redisClient {
         await this.client.ping();
     }
 
+    public async isHealthy() {
+        return this.alive;
+    }
+
     public async getShapeType(type: ShapeType) : Promise<ShapeArray> {
         console.log(`Getting list of ${type} from redis.`);
         const indexName = 'shape-type-idx';
@@ -41,7 +49,7 @@ export class redisClient {
         console.debug(`Query => FT.SEARCH ${indexName} ${filter} RETURN ${retArr.length} ${retArr.join(" ")}`);
         
         var response = await this.client.ft.search(indexName, filter, { RETURN: retArr })
-        console.log(`Getting list of ${type} from redis succeeded. Total of ${response.total} shapes found.`);
+        console.log(`Getting list of ${type} from redis succeeded. Total of ${response.total} shapes found`);
         return response.documents as ShapeArray;
     }
 

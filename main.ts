@@ -76,7 +76,6 @@ function messagesReducer(list: shapeObject[]) : shapeObject[] {
 
 function processMessagesHandler(list: shapeObject[]) {
   console.log("Shape files updated: " + JSON.stringify(list));
-  console.log(list.constructor.name);
   for (const so of list) {
     processShapeObject(so);
   }
@@ -155,21 +154,21 @@ async function processShapeObject(sl: shapeObject) {
   }
   
   var ret = await Promise.all(promises);
-  var publishPromises : Promise<any>[] = [];
-  console.log(ret);
+  console.log(`Create, change, remove promises returned ${JSON.stringify(ret)}`);
 
   // TODO: Only publish for the specific types which have changed
+  var publishPromises : Promise<any>[] = [];
   publishPromises.push(rec.publishChange(ShapeType.Limit));
   publishPromises.push(rec.publishChange(ShapeType.NoGo));
   publishPromises.push(rec.publishChange(ShapeType.Parking));
   publishPromises.push(rec.publishChange(ShapeType.NoParking));
   var ret2 = await Promise.all(promises);
-  console.log(ret2);
+  console.log(`Publish promises returned ${JSON.stringify(ret2)}`);
 }
 
 async function getShapeTypeListFromS3(sl: shapeObject) : Promise<fileList | null> {
   try {
-    console.log(`Getting object ${sl.objectKey} from s3 bucket ${sl.bucketName}.`);
+    console.log(`Getting object ${sl.objectKey} from s3 bucket ${sl.bucketName}`);
     
     var content = await s3c.getObjectContent(sl.bucketName, sl.objectKey);
     if (!content)
@@ -192,11 +191,11 @@ async function getShapeTypeListFromS3(sl: shapeObject) : Promise<fileList | null
     }
 
     const fl: fileList = { activeFiles: actives, inactiveFiles: inactives, deletedFiles: deleted, shapeType: type };
-    console.log(`Getting object ${sl.objectKey} from s3 bucket ${sl.bucketName} succeeded.`);
-    console.log(`List of s3 ${fl.shapeType} has ${fl.activeFiles.length} active, ${fl.inactiveFiles.length} inactive, and ${fl.deletedFiles.length} deleted files.`)
+    console.log(`Getting object ${sl.objectKey} from s3 bucket ${sl.bucketName} succeeded`);
+    console.log(`List of s3 ${fl.shapeType} has ${fl.activeFiles.length} active, ${fl.inactiveFiles.length} inactive, and ${fl.deletedFiles.length} deleted files`)
     return fl;
   } catch (err : any) {
-    console.error(`Getting object ${sl.objectKey} from s3 bucket ${sl.bucketName} failed.`, err);
+    console.error(`Getting object ${sl.objectKey} from s3 bucket ${sl.bucketName} failed`, err);
     return null;
   }
 }
@@ -224,10 +223,10 @@ async function getShapeTypeListFromRedis(type: ShapeType): Promise<fileList | nu
     }
 
     var fl: fileList = { activeFiles: actives, inactiveFiles: inactives, deletedFiles:deleted, shapeType: type};
-    console.log(`List of redis ${fl.shapeType} has ${fl.activeFiles.length} active, ${fl.inactiveFiles.length} inactive, and ${fl.deletedFiles.length} deleted files.`)
+    console.log(`List of redis ${fl.shapeType} has ${fl.activeFiles.length} active, ${fl.inactiveFiles.length} inactive, and ${fl.deletedFiles.length} deleted files`)
     return fl;
   } catch (err : any) {
-    console.error(`Getting list of ${type} from redis failed.`, err);
+    console.error(`Getting list of ${type} from redis failed`, err);
     return null;
   }
 }

@@ -2,6 +2,7 @@ import { SQSClient, ReceiveMessageCommand, DeleteMessageBatchCommand, ReceiveMes
 
 export class sqsClient {
 
+  private alive = false;
   public readonly sqsQueueUrl = process.env.SQS_QUEUE_URL;
   public readonly sqsParams = {
     MaxNumberOfMessages: 10,
@@ -52,16 +53,22 @@ export class sqsClient {
     }
   }
 
+  public async isHealthy() {
+    return this.alive;
+  }
+  
   public async run<T>() {
     while (true) {
       try {
         const rmc = new ReceiveMessageCommand(this.sqsParams);
         const data : ReceiveMessageCommandOutput = await this.sqsClient.send(rmc);
+        this.alive = true;
         if (data.Messages) {
           // NOTE: Could await next call but performance is better when called async
           this.processReceivedMessages<T>(data.Messages);
         }
       } catch (err) {
+        this.alive = false;
         console.log("Error handling redis messages", err);
       } finally {
         console.log("Waiting...");

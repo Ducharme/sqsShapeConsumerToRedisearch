@@ -2,6 +2,7 @@ import { S3Client, GetObjectCommand, GetObjectCommandInput, SelectObjectContentC
 
 export class s3client {
   private readonly client: S3Client = new S3Client({region: process.env.AWS_REGION});
+  //TODO: Implement -> private alive = false;
 
   public async getObjectContent(bucketName: string, key: string) : Promise<string | undefined> {
     const streamToString = (stream : NodeJS.ReadableStream | ReadableStream | Blob) =>
